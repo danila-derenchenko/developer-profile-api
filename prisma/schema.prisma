@@ -1,0 +1,13 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Profile {
+  id   Int    @id @default(autoincrement())
+  name String
+}
