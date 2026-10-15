@@ -8,6 +8,59 @@ datasource db {
 }
 
 model Profile {
-  id   Int    @id @default(autoincrement())
-  name String
+  id          Int                @id @default(autoincrement())
+  slug        String             @unique @default("owner")
+  name        String
+  description String             @default("")
+  links       ProfessionalLink[]
+  skills      Skill[]
+  experience  Experience[]
+  projects    Project[]
+}
+
+model ProfessionalLink {
+  id        Int     @id @default(autoincrement())
+  label     String
+  url       String
+  order     Int
+  profileId Int
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, url])
+}
+
+model Skill {
+  id        Int     @id @default(autoincrement())
+  name      String
+  order     Int
+  profileId Int
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, name])
+}
+
+model Experience {
+  id           Int       @id @default(autoincrement())
+  company      String
+  position     String
+  startDate    DateTime  @db.Date
+  endDate      DateTime? @db.Date
+  achievements String[]
+  order        Int
+  profileId    Int
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, company, position, startDate])
+}
+
+model Project {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String
+  url         String
+  order       Int
+  profileId   Int
+  profile     Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, url])
 }

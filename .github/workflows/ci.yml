@@ -1,0 +1,39 @@
+name: Check
+
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: developer_profile
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d developer_profile"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/developer_profile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Start Docker from an empty database
+        run: docker compose -p profile-ci up --build -d --wait --wait-timeout 120
+      - name: Docker logs on failure
+        if: failure()
+        run: docker compose -p profile-ci logs
+      - name: Clean up
+        if: always()
+        run: docker compose -p profile-ci down -v
