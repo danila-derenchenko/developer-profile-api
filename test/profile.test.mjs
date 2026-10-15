@@ -60,6 +60,14 @@ test('fresh database, repeatable seed and real NestJS GraphQL API', { timeout: 9
     assert.equal(await prisma.project.count(), 1);
     assert.equal(await prisma.professionalLink.count(), 1);
 
+    await t.test('entrypoint works when Vercel defers listen until after import', () => {
+      execFileSync(process.execPath, ['test/helpers/vercel-bootstrap.mjs'], {
+        env: { ...process.env, VERCEL: '1' },
+        stdio: 'pipe',
+        timeout: 15000,
+      });
+    });
+
     app = await NestFactory.create(AppModule, { logger: false });
     await app.listen(0, '127.0.0.1');
     const endpoint = `${await app.getUrl()}/graphql`;
