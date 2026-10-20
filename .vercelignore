@@ -1,0 +1,9 @@
+.env
+.env.*
+*.pdf
+node_modules
+dist
+prisma/client
+test
+.github
+.vscode

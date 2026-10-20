@@ -6,14 +6,36 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: developer_profile
     ports:
-      - "5434:5432"
+      - "127.0.0.1:${DB_PORT:-5434}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d developer_profile"]
-      interval: 5s
+      interval: 2s
       timeout: 5s
-      retries: 10
+      retries: 20
+
+  app:
+    build: .
+    init: true
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/developer_profile
+      PORT: 4000
+    ports:
+      - "${PORT:-4000}:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:4000/graphql', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query:'{ profile { id } }'})}).then(async r=>{const b=await r.json();process.exit(r.ok && b.data?.profile?.id && !b.errors ? 0 : 1)}).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
 
 volumes:
   postgres_data:

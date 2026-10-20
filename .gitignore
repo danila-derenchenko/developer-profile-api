@@ -2,3 +2,7 @@ node_modules/
 dist/
 .env
 /prisma/client/
+.env.*
+!.env.example
+*.pdf
+.vercel/

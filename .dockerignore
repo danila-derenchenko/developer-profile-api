@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.env
+.env.*
+*.log
+test
+README.md
+prisma/client
+*.pdf
+.github
+.vercel
